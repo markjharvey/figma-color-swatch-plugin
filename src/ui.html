@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rainbow Color System</title>
+    <style>
+        body {
+            font: 12px Inter, sans-serif;
+            margin: 20px;
+        }
+
+        h2 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .collections {
+            margin-bottom: 16px;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #E5E5E5;
+            margin-bottom: 16px;
+            font-size: 12px;
+        }
+
+        button {
+            width: 100%;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            background: #18A0FB;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 32px;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin-top: 16px;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .error {
+            background: #FEE;
+            color: #C00;
+        }
+
+        .success {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        .progress {
+            background: #E3F2FD;
+            color: #1565C0;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, .3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .button-text {
+            display: inline-block;
+        }
+
+        button.loading .spinner {
+            display: inline-block;
+        }
+
+        button.loading .button-text {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Rainbow Color System</h2>
+    <div class="collections">
+        <select id="collection-select">
+            <option value="">Select a variable collection...</option>
+        </select>
+    </div>
+    <button id="create" disabled>
+        <span class="button-text">Create Color Swatches</span>
+        <span class="spinner"></span>
+    </button>
+    <div id="message"></div>
+
+    <script>
+        let selectedCollectionId = '';
+        const select = document.getElementById('collection-select');
+        const createButton = document.getElementById('create');
+        const messageDiv = document.getElementById('message');
+
+        // Listen for collections from the plugin
+        onmessage = event => {
+            const msg = event.data.pluginMessage;
+
+            if (msg.type === 'collections') {
+                // Populate the select with collections
+                msg.collections.forEach(collection => {
+                    const option = document.createElement('option');
+                    option.value = collection.id;
+                    option.textContent = collection.name;
+                    select.appendChild(option);
+                });
+            } else if (msg.type === 'error') {
+                // End loading state on error
+                endLoading();
+                showMessage(msg.message, 'error');
+            } else if (msg.type === 'success') {
+                // End loading state on success
+                endLoading();
+                showMessage(msg.message, 'success');
+            } else if (msg.type === 'progress') {
+                // Update progress message
+                const progressText = msg.message ||
+                    `Processing: ${msg.completed} of ${msg.total} colors...`;
+                showMessage(progressText, 'progress');
+            }
+        };
+
+        // Handle collection selection
+        select.onchange = () => {
+            selectedCollectionId = select.value;
+            createButton.disabled = !selectedCollectionId;
+        };
+
+        // Handle create button click
+        createButton.onclick = () => {
+            if (selectedCollectionId) {
+                // Start loading state IMMEDIATELY
+                startLoading();
+                showMessage('Creating color swatches...', 'progress');
+
+                // Use setTimeout with 0ms delay to ensure the UI updates before 
+                // sending the message to the plugin (which might block the main thread)
+                setTimeout(() => {
+                    parent.postMessage({
+                        pluginMessage: {
+                            type: 'create-swatches',
+                            collectionId: selectedCollectionId
+                        }
+                    }, '*');
+                }, 0);
+            }
+        };
+
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+        }
+
+        function startLoading() {
+            createButton.classList.add('loading');
+            createButton.disabled = true;
+            select.disabled = true;
+        }
+
+        function endLoading() {
+            createButton.classList.remove('loading');
+            createButton.disabled = !selectedCollectionId;
+            select.disabled = false;
+        }
+    </script>
+</body>
+
+</html>

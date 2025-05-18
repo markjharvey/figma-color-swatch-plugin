@@ -1,0 +1,17 @@
+{
+  "name": "rainbow-figma-plugin",
+  "version": "1.0.0",
+  "description": "Rainbow Color System Figma Plugin",
+  "scripts": {
+    "build": "node build.js",
+    "watch": "nodemon --watch src -e ts,html build.js"
+  },
+  "author": "Rainbow",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.82.0",
+    "esbuild": "^0.19.12",
+    "nodemon": "^3.1.10",
+    "typescript": "^5.3.3"
+  }
+}
