@@ -1,17 +1,20 @@
 {
-  "name": "rainbow-figma-plugin",
-  "version": "1.0.0",
-  "description": "Rainbow Color System Figma Plugin",
+  "name": "leonardo-to-figma-variables",
+  "version": "1.3.0",
+  "description": "A Figma plugin to update variable collections from Leonardo design tokens",
   "scripts": {
     "build": "node build.js",
     "watch": "nodemon --watch src -e ts,html build.js"
   },
-  "author": "Rainbow",
-  "license": "UNLICENSED",
+  "author": "",
+  "license": "MIT",
   "devDependencies": {
     "@figma/plugin-typings": "^1.82.0",
     "esbuild": "^0.19.12",
     "nodemon": "^3.1.10",
     "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@rogieking/figui3": "^1.6.3"
   }
 }
